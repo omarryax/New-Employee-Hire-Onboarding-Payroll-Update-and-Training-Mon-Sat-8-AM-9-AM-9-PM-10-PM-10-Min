@@ -2,7 +2,7 @@
 
 ## 📋 Project Overview
 
-This project contains an automated workflow for handling new employee onboarding, payroll setup, and training management. The workflow was originally built in **Make.com** (formerly Integromat) and has been converted to **n8n** format for deployment.
+This project contains an automated workflow for handling new employee onboarding, payroll setup, and training management. 
 
 ### Workflow Purpose
 
