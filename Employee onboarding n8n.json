@@ -1,0 +1,1887 @@
+{
+  "name": "New Employee Hire/Onboarding Payroll Update and Training Mon-Sat 8 AM/9 AM-9 PM/10 PM 10 Min",
+  "nodes": [
+    {
+      "id": "bdc91a0f-120a-452a-9f34-58748ecbe7ba",
+      "name": "TriggerNewEmployee (1)",
+      "type": "n8n-nodes-base.bambooHrTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1650
+      ],
+      "parameters": {
+        "event": "employeeCreated"
+      }
+    },
+    {
+      "id": "2fd340fd-1d67-49c7-b52b-5682c99a207f",
+      "name": "Hubstaff Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        300,
+        1650
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "/v2/organizations/21651/members",
+        "options": {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "queryParameters": {
+            "include": "users"
+          }
+        }
+      }
+    },
+    {
+      "id": "a18485ec-ae54-4a8f-b915-b21b210a1cb2",
+      "name": "BasicRouter (66)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        600,
+        1650
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": []
+        }
+      }
+    },
+    {
+      "id": "bc3377c5-a727-4dc2-a6d2-2da699a36a68",
+      "name": "GetEmployee (4)",
+      "type": "n8n-nodes-base.bambooHr",
+      "typeVersion": 1,
+      "position": [
+        900,
+        750
+      ],
+      "parameters": {
+        "employeeId": "{{ $('TriggerNewEmployee (1)').item.json.id }}",
+        "fields": [
+          "4637",
+          "4643",
+          "4175"
+        ]
+      }
+    },
+    {
+      "id": "ea6a0cf3-0863-4ec1-ac0e-ed725bfce42b",
+      "name": "BasicFeeder (68)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        750
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "2df433bc-8c59-490f-8a38-77eb453fd2f7",
+      "name": "GetCustomField (35)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        750
+      ],
+      "parameters": {
+        "workspaceId": "718447231457202",
+        "customFieldId": "1169363591289217"
+      }
+    },
+    {
+      "id": "0fd03afb-9795-49e5-9399-5f09bf334ae2",
+      "name": "CreateTask (2)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        750
+      ],
+      "parameters": {
+        "operation": "create",
+        "name": "{{ $('TriggerNewEmployee (1)').item.json.firstName }} {{ $('TriggerNewEmployee (1)').item.json.lastName }} hired as a {{ $('TriggerNewEmployee (1)').item.json.employmentHistoryStatus }} {{ $('TriggerNewEmployee (1)').item.json.jobTitle }} on {{ $('TriggerNewEmployee (1)').item.json.hireDate }}",
+        "external": "{}",
+        "ignoreMe": "yes",
+        "destination": "projAndSect",
+        "ignoreMeTwo": "no",
+        "memberships": "[{'project': '1165240953566665', 'section': '1201770145165664'}]",
+        "workspace_custom_fields": "{'1169363591289217': '{{get(map(35.enum_options; \"gid\"; \"name\"; 1.department); 1)}}'}"
+      }
+    },
+    {
+      "id": "08311377-db72-4c82-9ac1-87c35e443636",
+      "name": "listSheets (36)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        750
+      ],
+      "parameters": {
+        "operation": "get"
+      }
+    },
+    {
+      "id": "8b92acad-9460-4443-aaaf-b714c5315dbf",
+      "name": "BasicAggregator (39)",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        750
+      ],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "aggregated"
+      }
+    },
+    {
+      "id": "3d45efa3-add0-4581-b82e-d57617398889",
+      "name": "BasicRouter (17)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        2700,
+        750
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": []
+        }
+      }
+    },
+    {
+      "id": "8572e9b5-0037-4f6f-8c4a-0048a86d75ae",
+      "name": "updateCell (38)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "value": "{{ $('TriggerNewEmployee (1)').item.json.id }}"
+      }
+    },
+    {
+      "id": "046a7ab9-fa15-459e-a35a-eeeb343f1d74",
+      "name": "renameSheet (134)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        0
+      ],
+      "parameters": {
+        "operation": "update"
+      }
+    },
+    {
+      "id": "8b78f1b1-3b01-4aa4-8744-a8d5fac1d86d",
+      "name": "copyASheet (31)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        300
+      ],
+      "parameters": {
+        "operation": "copy"
+      }
+    },
+    {
+      "id": "838b815d-358e-48de-b28a-7c1345e61438",
+      "name": "updateCell (11)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        300
+      ],
+      "parameters": {
+        "operation": "update",
+        "value": "{{ $('TriggerNewEmployee (1)').item.json.id }}"
+      }
+    },
+    {
+      "id": "0c8f5a9d-8753-4986-a015-cf0a4092d918",
+      "name": "updateCell (5)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        300
+      ],
+      "parameters": {
+        "operation": "update",
+        "value": "{{formatDate(1.hireDate; \"MM/01/YYYY\")}}"
+      }
+    },
+    {
+      "id": "21b6d2d5-da87-4a5d-886e-aa8c29314bc3",
+      "name": "addSheet (18)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        600
+      ],
+      "parameters": {
+        "operation": "append"
+      }
+    },
+    {
+      "id": "91f104c4-8923-43ac-ac4b-f50d83f99ad4",
+      "name": "makeAPICall (27)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        600
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "277b783b-4040-4862-b05e-8c42c1e86995",
+      "name": "TransformToJSON (29)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        600
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "object",
+              "value": "{{ $('makeAPICall (27)').item.json.body.valueRanges }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4507027f-53de-4ab1-90ff-a0530b1072e3",
+      "name": "makeAPICall (30)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        600
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "3a71b823-1cc9-459b-9249-3c973b6a85ed",
+      "name": "updateCell (32)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        600
+      ],
+      "parameters": {
+        "operation": "update",
+        "value": "{{formatDate(1.hireDate; \"MM/01/YYYY\")}}"
+      }
+    },
+    {
+      "id": "22fcdffe-0a75-495c-8fbc-5989f2a63d0f",
+      "name": "updateCell (33)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        4500,
+        600
+      ],
+      "parameters": {
+        "operation": "update",
+        "value": "{{ $('TriggerNewEmployee (1)').item.json.id }}"
+      }
+    },
+    {
+      "id": "7e5c799f-bc60-421e-8698-5272b1b82c9d",
+      "name": "Time Off Policies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        900
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "5ba980df-4db1-4116-aa6a-e318be227983",
+      "name": "BasicFeeder (45)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        900
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "d42972ca-ad1b-463f-b751-13a6ff34d08b",
+      "name": "BasicRouter (46)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        900
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": []
+        }
+      }
+    },
+    {
+      "id": "58d0fd19-9c6e-4935-adf2-8cc7acd8b70f",
+      "name": "AggregateToJSON (48)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        900
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "b647fe3b-8a2e-47fb-9edc-fec97d2b04a4",
+      "name": "Assign Time Off Policies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        900
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "1742218f-663c-4ce8-beed-56d5681aecc6",
+      "name": "BasicFeeder (73)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        1200
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "a48acaa8-8d7e-4f4d-bfd9-4dd301a714e6",
+      "name": "SetVariables (72)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        1200
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "scope",
+              "value": "roundtrip"
+            },
+            {
+              "name": "variables",
+              "value": "[{'name': 'Working Day', 'value': '{{if(contains(4.`4643`; 73.value); true; false)}}'}, {'name': 'Day', 'value': '{{ $('BasicFeeder (73)').item.json.value }}'}, {'name': 'Value', 'value': '{{switch(73.value; \"Sun\"; 1; \"Mon\"; 2; \"Tue\"; 3; \"Wed\"; 4; \"Thu\"; 5; \"Fri\"; 6; \"Sat\"; 7)}}'}]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ceee2799-04bc-45f8-b94d-b041a58b6314",
+      "name": "BasicAggregator (74)",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        1200
+      ],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "aggregated"
+      }
+    },
+    {
+      "id": "aae64d6a-c5c7-4f27-9591-0d0f6f414689",
+      "name": "createpdf (69)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        1200
+      ],
+      "parameters": {
+        "method": "GET"
+      }
+    },
+    {
+      "id": "996d3050-39dc-4ac3-a746-eafe7c61f25d",
+      "name": "ActionGetFile (70)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        1200
+      ],
+      "parameters": {
+        "method": "get",
+        "url": "https://hooks.slack.com/services/YOUR_WEBHOOK_URL"
+      }
+    },
+    {
+      "id": "7b07eb72-cf0a-4622-bd0b-63aee4bde5f2",
+      "name": "ActionSendDataBasicAuth (71)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        4500,
+        1200
+      ],
+      "parameters": {
+        "method": "post",
+        "url": "https://hooks.slack.com/services/YOUR_WEBHOOK_URL",
+        "options": {
+          "headers": {},
+          "queryParameters": {}
+        }
+      }
+    },
+    {
+      "id": "4b3ca4d4-39be-4b42-9c7e-4f9e58bf9359",
+      "name": "Trigger Payroll Scenario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        1500
+      ],
+      "parameters": {
+        "method": "post",
+        "url": "https://hooks.slack.com/services/YOUR_WEBHOOK_URL",
+        "options": {
+          "headers": {},
+          "queryParameters": {}
+        }
+      }
+    },
+    {
+      "id": "81bc81f2-4d5a-4295-8de9-599c42cb2289",
+      "name": "MakeanAPICall (85)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        900,
+        2550
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "1bd456e6-7f0b-430f-939c-a3968dac9416",
+      "name": "MakeanAPICall (122)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        2550
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "d6dc2593-1dcc-4f20-b2cc-b193cca4a832",
+      "name": "ListTeamsInOrganization (53)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        2550
+      ],
+      "parameters": {
+        "operation": "getAll"
+      }
+    },
+    {
+      "id": "6a87986a-9e0f-455e-b270-1272f56c453c",
+      "name": "BasicAggregator (54)",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        2550
+      ],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "aggregated"
+      }
+    },
+    {
+      "id": "b8da8c46-3d4b-4c9e-877e-52b16dc7321a",
+      "name": "MakeApiCall (117)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        2550
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "442f8818-9299-4849-a27a-32a8c134147c",
+      "name": "BasicFeeder (118)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        2550
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "bb3befd0-325a-423f-bba6-515163e4446f",
+      "name": "BasicAggregator (61)",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2700,
+        2550
+      ],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "aggregated"
+      }
+    },
+    {
+      "id": "be2589bd-3379-4d6e-8d6c-9048c5986d3a",
+      "name": "BasicRouter (58)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        3000,
+        2550
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": []
+        }
+      }
+    },
+    {
+      "id": "0bfb5086-f15a-4aa9-a30a-e7544ed39782",
+      "name": "BasicRouter (86)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        1950
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": []
+        }
+      }
+    },
+    {
+      "id": "f42fc323-814b-4b4b-a4a2-7b683be17a77",
+      "name": "createATeam (55)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        1800
+      ],
+      "parameters": {
+        "operation": "createTeam"
+      }
+    },
+    {
+      "id": "7584cd52-adb2-4915-a9c0-4857d09f2946",
+      "name": "CreateTask (120)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        1800
+      ],
+      "parameters": {
+        "operation": "create",
+        "external": "{}",
+        "ignoreMe": "no",
+        "destination": "projAndSect",
+        "ignoreMeTwo": "no",
+        "memberships": "[{'project': '1179234992177041', 'section': '1179278220507631'}]"
+      }
+    },
+    {
+      "id": "cd37f44c-a1c8-4937-8da0-9f2a62bc1db4",
+      "name": "CreateProject (62)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        1800
+      ],
+      "parameters": {
+        "operation": "create"
+      }
+    },
+    {
+      "id": "4b2adf50-e2bb-4c60-a52c-221d85ab39cf",
+      "name": "createAPortfolio (77)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        4500,
+        1800
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "f94e6a07-aa36-40f3-826e-d8382f2353a3",
+      "name": "MakeanAPICall (81)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        1800
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "f8b825f6-9c82-4436-baa9-2c1155f92694",
+      "name": "MakeanAPICall (82)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        5100,
+        1800
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "2d64b51f-edb9-46c3-bfd2-fa4de4d1b26d",
+      "name": "BasicFeeder (84)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        5400,
+        1800
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "c47bec74-c532-4850-93f6-bc46bdaa3041",
+      "name": "AddUserToTeam (83)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        5700,
+        1800
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "17f93a12-8460-4104-8abc-88a6f5562582",
+      "name": "MakeanAPICall (94)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        2100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "76402ecc-cebf-4a9e-ab0e-46a4d5e798cc",
+      "name": "CreateTask (128)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        2100
+      ],
+      "parameters": {
+        "operation": "create",
+        "external": "{}",
+        "ignoreMe": "no",
+        "destination": "projAndSect",
+        "ignoreMeTwo": "no",
+        "memberships": "[{'project': '1179234992177041', 'section': '1179278220507631'}]"
+      }
+    },
+    {
+      "id": "378d6515-f3ce-4162-ba16-c1e2e7417bcb",
+      "name": "AddUserToTeam (91)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        2100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "99e00d0f-88ed-42c1-82c9-23398e522997",
+      "name": "BasicRouter (97)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        2550
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": []
+        }
+      }
+    },
+    {
+      "id": "c302c9e5-6d71-4a8a-bec4-067d965c278a",
+      "name": "createATeam (56)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        2400
+      ],
+      "parameters": {
+        "operation": "createTeam"
+      }
+    },
+    {
+      "id": "1ccda5f0-2c6d-47d6-aa39-205c64bbfc33",
+      "name": "CreateTask (125)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        2400
+      ],
+      "parameters": {
+        "operation": "create",
+        "external": "{}",
+        "ignoreMe": "no",
+        "destination": "projAndSect",
+        "ignoreMeTwo": "no",
+        "memberships": "[{'project': '1179234992177041', 'section': '1179278220507631'}]"
+      }
+    },
+    {
+      "id": "20fae079-35bc-4a8e-831a-624cf1ed31e5",
+      "name": "CreateProject (63)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        2400
+      ],
+      "parameters": {
+        "operation": "create"
+      }
+    },
+    {
+      "id": "fd6f72d7-e368-4bb5-9463-1fc8fb3fb26b",
+      "name": "createAPortfolio (102)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        4500,
+        2400
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "356aa2b8-8125-4985-8b9d-373c652035f6",
+      "name": "MakeanAPICall (103)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        2400
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c9b8a72e-71b6-47dd-99fc-28928b276aff",
+      "name": "MakeanAPICall (121)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        5100,
+        2400
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "40327548-3557-425a-b5e1-7c6c9a1551ac",
+      "name": "MakeanAPICall (104)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        5400,
+        2400
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "bd1cad41-fe08-4bdc-8191-9b27b900841c",
+      "name": "BasicFeeder (105)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        5700,
+        2400
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "44968812-4d26-4cf8-85ef-ef681455d016",
+      "name": "AddUserToTeam (106)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        6000,
+        2400
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "861384d7-a305-438b-af25-11fdd6cab225",
+      "name": "MakeanAPICall (99)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        2700
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "ed9cd882-4958-4502-ba45-3f3d4c41bbc0",
+      "name": "CreateTask (129)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        2700
+      ],
+      "parameters": {
+        "operation": "create",
+        "external": "{}",
+        "ignoreMe": "no",
+        "destination": "projAndSect",
+        "ignoreMeTwo": "no",
+        "memberships": "[{'project': '1179234992177041', 'section': '1179278220507631'}]"
+      }
+    },
+    {
+      "id": "6c6b7d1a-a218-4a6c-a771-1ad035a383bf",
+      "name": "AddUserToTeam (101)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        2700
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "489093ce-b6ec-48a5-ad3a-804e853e2a7e",
+      "name": "BasicRouter (98)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        3150
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": []
+        }
+      }
+    },
+    {
+      "id": "16d7f9fa-3192-477b-9904-131df69abb69",
+      "name": "createATeam (57)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        3000
+      ],
+      "parameters": {
+        "operation": "createTeam"
+      }
+    },
+    {
+      "id": "4780108e-5b4a-4721-9ab7-4342beb621d8",
+      "name": "CreateTask (126)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        3000
+      ],
+      "parameters": {
+        "operation": "create",
+        "external": "{}",
+        "ignoreMe": "no",
+        "destination": "projAndSect",
+        "ignoreMeTwo": "no",
+        "memberships": "[{'project': '1179234992177041', 'section': '1179278220507631'}]"
+      }
+    },
+    {
+      "id": "c709fc81-5d43-47b1-9ac8-38b18fde13fe",
+      "name": "CreateProject (64)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        3000
+      ],
+      "parameters": {
+        "operation": "create"
+      }
+    },
+    {
+      "id": "ec521371-b437-4adc-9c82-c00ed48d4883",
+      "name": "createAPortfolio (110)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        4500,
+        3000
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c5f044db-05b3-4714-9fe1-48b236bab349",
+      "name": "MakeanAPICall (111)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        3000
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "e55f42f2-0fe9-4c2c-b273-1d0e8f5976ab",
+      "name": "MakeanAPICall (112)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        5100,
+        3000
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "26463cca-3c27-4957-9ddb-e925fe3353b6",
+      "name": "MakeanAPICall (127)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        5400,
+        3000
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "fae29361-dbc6-4644-921f-b18a44740774",
+      "name": "BasicFeeder (113)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        5700,
+        3000
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "3fe29801-c7ad-4127-a83c-2a20f9431678",
+      "name": "AddUserToTeam (114)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        6000,
+        3000
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "23c1cbb3-460f-4366-bfa3-e675bbe51213",
+      "name": "MakeanAPICall (107)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        3300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "8a70e686-742c-4b2c-b782-77dc09e3560f",
+      "name": "CreateTask (130)",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        3300
+      ],
+      "parameters": {
+        "operation": "create",
+        "external": "{}",
+        "ignoreMe": "no",
+        "destination": "projAndSect",
+        "ignoreMeTwo": "no",
+        "memberships": "[{'project': '1179234992177041', 'section': '1179278220507631'}]"
+      }
+    },
+    {
+      "id": "488c3d69-8fd8-413b-8593-164f947dbba4",
+      "name": "AddUserToTeam (109)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        3300
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "TriggerNewEmployee (1)": {
+      "main": [
+        [
+          {
+            "node": "Hubstaff Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hubstaff Users": {
+      "main": [
+        [
+          {
+            "node": "BasicRouter (66)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicRouter (66)": {
+      "main": [
+        [
+          {
+            "node": "GetEmployee (4)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MakeanAPICall (85)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetEmployee (4)": {
+      "main": [
+        [
+          {
+            "node": "BasicFeeder (68)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicFeeder (68)": {
+      "main": [
+        [
+          {
+            "node": "GetCustomField (35)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetCustomField (35)": {
+      "main": [
+        [
+          {
+            "node": "CreateTask (2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateTask (2)": {
+      "main": [
+        [
+          {
+            "node": "listSheets (36)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "listSheets (36)": {
+      "main": [
+        [
+          {
+            "node": "BasicAggregator (39)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicAggregator (39)": {
+      "main": [
+        [
+          {
+            "node": "BasicRouter (17)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicRouter (17)": {
+      "main": [
+        [
+          {
+            "node": "updateCell (38)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "copyASheet (31)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "addSheet (18)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Time Off Policies",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BasicFeeder (73)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Trigger Payroll Scenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updateCell (38)": {
+      "main": [
+        [
+          {
+            "node": "renameSheet (134)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "copyASheet (31)": {
+      "main": [
+        [
+          {
+            "node": "updateCell (11)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updateCell (11)": {
+      "main": [
+        [
+          {
+            "node": "updateCell (5)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "addSheet (18)": {
+      "main": [
+        [
+          {
+            "node": "makeAPICall (27)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "makeAPICall (27)": {
+      "main": [
+        [
+          {
+            "node": "TransformToJSON (29)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TransformToJSON (29)": {
+      "main": [
+        [
+          {
+            "node": "makeAPICall (30)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "makeAPICall (30)": {
+      "main": [
+        [
+          {
+            "node": "updateCell (32)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updateCell (32)": {
+      "main": [
+        [
+          {
+            "node": "updateCell (33)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Time Off Policies": {
+      "main": [
+        [
+          {
+            "node": "BasicFeeder (45)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicFeeder (45)": {
+      "main": [
+        [
+          {
+            "node": "BasicRouter (46)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicRouter (46)": {
+      "main": [
+        [
+          {
+            "node": "AggregateToJSON (48)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AggregateToJSON (48)": {
+      "main": [
+        [
+          {
+            "node": "Assign Time Off Policies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicFeeder (73)": {
+      "main": [
+        [
+          {
+            "node": "SetVariables (72)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetVariables (72)": {
+      "main": [
+        [
+          {
+            "node": "BasicAggregator (74)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicAggregator (74)": {
+      "main": [
+        [
+          {
+            "node": "createpdf (69)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createpdf (69)": {
+      "main": [
+        [
+          {
+            "node": "ActionGetFile (70)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ActionGetFile (70)": {
+      "main": [
+        [
+          {
+            "node": "ActionSendDataBasicAuth (71)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (85)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (122)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (122)": {
+      "main": [
+        [
+          {
+            "node": "ListTeamsInOrganization (53)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ListTeamsInOrganization (53)": {
+      "main": [
+        [
+          {
+            "node": "BasicAggregator (54)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicAggregator (54)": {
+      "main": [
+        [
+          {
+            "node": "MakeApiCall (117)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeApiCall (117)": {
+      "main": [
+        [
+          {
+            "node": "BasicFeeder (118)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicFeeder (118)": {
+      "main": [
+        [
+          {
+            "node": "BasicAggregator (61)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicAggregator (61)": {
+      "main": [
+        [
+          {
+            "node": "BasicRouter (58)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicRouter (58)": {
+      "main": [
+        [
+          {
+            "node": "BasicRouter (86)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BasicRouter (97)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BasicRouter (98)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicRouter (86)": {
+      "main": [
+        [
+          {
+            "node": "createATeam (55)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MakeanAPICall (94)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createATeam (55)": {
+      "main": [
+        [
+          {
+            "node": "CreateTask (120)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateTask (120)": {
+      "main": [
+        [
+          {
+            "node": "CreateProject (62)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateProject (62)": {
+      "main": [
+        [
+          {
+            "node": "createAPortfolio (77)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createAPortfolio (77)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (81)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (81)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (82)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (82)": {
+      "main": [
+        [
+          {
+            "node": "BasicFeeder (84)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicFeeder (84)": {
+      "main": [
+        [
+          {
+            "node": "AddUserToTeam (83)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (94)": {
+      "main": [
+        [
+          {
+            "node": "CreateTask (128)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateTask (128)": {
+      "main": [
+        [
+          {
+            "node": "AddUserToTeam (91)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicRouter (97)": {
+      "main": [
+        [
+          {
+            "node": "createATeam (56)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MakeanAPICall (99)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createATeam (56)": {
+      "main": [
+        [
+          {
+            "node": "CreateTask (125)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateTask (125)": {
+      "main": [
+        [
+          {
+            "node": "CreateProject (63)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateProject (63)": {
+      "main": [
+        [
+          {
+            "node": "createAPortfolio (102)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createAPortfolio (102)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (103)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (103)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (121)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (121)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (104)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (104)": {
+      "main": [
+        [
+          {
+            "node": "BasicFeeder (105)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicFeeder (105)": {
+      "main": [
+        [
+          {
+            "node": "AddUserToTeam (106)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (99)": {
+      "main": [
+        [
+          {
+            "node": "CreateTask (129)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateTask (129)": {
+      "main": [
+        [
+          {
+            "node": "AddUserToTeam (101)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicRouter (98)": {
+      "main": [
+        [
+          {
+            "node": "createATeam (57)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MakeanAPICall (107)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createATeam (57)": {
+      "main": [
+        [
+          {
+            "node": "CreateTask (126)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateTask (126)": {
+      "main": [
+        [
+          {
+            "node": "CreateProject (64)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateProject (64)": {
+      "main": [
+        [
+          {
+            "node": "createAPortfolio (110)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createAPortfolio (110)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (111)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (111)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (112)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (112)": {
+      "main": [
+        [
+          {
+            "node": "MakeanAPICall (127)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (127)": {
+      "main": [
+        [
+          {
+            "node": "BasicFeeder (113)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BasicFeeder (113)": {
+      "main": [
+        [
+          {
+            "node": "AddUserToTeam (114)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeanAPICall (107)": {
+      "main": [
+        [
+          {
+            "node": "CreateTask (130)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateTask (130)": {
+      "main": [
+        [
+          {
+            "node": "AddUserToTeam (109)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": []
+}
